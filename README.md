@@ -1,7 +1,7 @@
 # Desafio3-Iniciativa-Devops
 https://iniciativadevops.com.br/aula3/
 
-* Commandos
+* Comandos
 
 ```
 ┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/terraform-digitalocean
