@@ -161,3 +161,126 @@ OU
 * Testar com ip externo
 
 [Ip da Aplicação Digital Ocean](164.90.252.85)
+
+===============
+
+* Terraform init
+
+Após subir o cluster:
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/terraform-digitalocean
+└──> $ cp ./kube_config.yaml ~/.kube/config
+```
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/terraform-digitalocean
+└──> $ kubectl get nodes
+NAME            STATUS   ROLES    AGE    VERSION
+premium-clz5a   Ready    <none>   7m1s   v1.22.8
+premium-clz5e   Ready    <none>   7m1s   v1.22.8
+```
+
+* Aplicar deploymente do outro repo:
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/kube-news
+└──> $ kubectl apply -f k8s/deployment.yaml 
+deployment.apps/postgre created
+service/postgre created
+deployment.apps/kubenews created
+service/kube-news created
+```
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/kube-news
+└──> $ kubectl get all
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/kubenews-55554d8b4f-2pv8m   1/1     Running   0          3m54s
+pod/kubenews-55554d8b4f-hn5bv   1/1     Running   0          3m54s
+pod/postgre-786bc7b694-4nnnw    1/1     Running   0          3m55s
+
+NAME                 TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)        AGE
+service/kube-news    LoadBalancer   10.245.118.75    164.90.254.26   80:30000/TCP   3m54s
+service/kubernetes   ClusterIP      10.245.0.1       <none>          443/TCP        15m
+service/postgre      ClusterIP      10.245.152.215   <none>          5432/TCP       3m55s
+
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/kubenews   2/2     2            2           3m55s
+deployment.apps/postgre    1/1     1            1           3m55s
+
+NAME                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/kubenews-55554d8b4f   2         2         2       3m55s
+replicaset.apps/postgre-786bc7b694    1         1         1       3m55s
+```
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/terraform-digitalocean
+└──> $ kubectl get svc
+NAME         TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)        AGE
+kube-news    LoadBalancer   10.245.118.75    164.90.254.26   80:30000/TCP   4m24s
+kubernetes   ClusterIP      10.245.0.1       <none>          443/TCP        15m
+postgre      ClusterIP      10.245.152.215   <none>          5432/TCP       4m25s
+```
+
+* Deletar o manifesto e criar a pipeline
+
+"Obs": Atento ao Repo
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/kube-news
+└──> $ kubectl delete -f k8s/deployment.yaml 
+deployment.apps "postgre" deleted
+service "postgre" deleted
+deployment.apps "kubenews" deleted
+service "kube-news" deleted
+```
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/terraform-digitalocean
+└──> $ kubectl get pods
+No resources found in default namespace.
+```
+
+* Pipeline kube-news
+
+[Github](https://github.com/orbite82/kube-news)
+
+ir até actions: https://github.com/orbite82/kube-news/actions/new
+
+clicar em : set up a workflow yourself 
+
+* Deploy CI | CD
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/kube-news
+└──> $ kubectl get pods
+NAME                        READY   STATUS    RESTARTS   AGE
+kubenews-859cfdc6f5-cffqz   1/1     Running   0          82s
+kubenews-859cfdc6f5-kzsnh   1/1     Running   0          82s
+postgre-786bc7b694-5wbzc    1/1     Running   0          83s
+```
+
+[CI/CD](https://github.com/orbite82/kube-news/runs/6818040114?check_suite_focus=true)
+
+```
+┌─[orbite]@[orbite-desktop]:~/Iniciativa-Devops/kube-news
+└──> $ kubectl get all
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/kubenews-859cfdc6f5-cffqz   1/1     Running   0          2m58s
+pod/kubenews-859cfdc6f5-kzsnh   1/1     Running   0          2m58s
+pod/postgre-786bc7b694-5wbzc    1/1     Running   0          2m59s
+
+NAME                 TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)        AGE
+service/kube-news    LoadBalancer   10.245.171.128   167.172.0.140   80:30000/TCP   2m58s
+service/kubernetes   ClusterIP      10.245.0.1       <none>          443/TCP        4h35m
+service/postgre      ClusterIP      10.245.25.246    <none>          5432/TCP       2m59s
+
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/kubenews   2/2     2            2           2m58s
+deployment.apps/postgre    1/1     1            1           2m59s
+
+NAME                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/kubenews-859cfdc6f5   2         2         2       2m58s
+replicaset.apps/postgre-786bc7b694    1         1         1       2m59s
+```
